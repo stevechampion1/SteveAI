@@ -1,0 +1,137 @@
+# SteveAI - Docker Compose Configuration
+
+version: '3.8'
+
+services:
+  # Main SteveAI service
+  steveai:
+    build: .
+    container_name: steveai-main
+    ports:
+      - "8000:8000"  # FastAPI server
+      - "5000:5000"  # Flask server
+    volumes:
+      - ./output:/app/output
+      - ./logs:/app/logs
+      - ./config.yaml:/app/config.yaml
+      - ./data:/app/data
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - PYTHONPATH=/app
+    command: python teacher_inference_gpu.py
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import torch; print('Health check passed')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Model deployment service
+  steveai-deploy:
+    build: .
+    container_name: steveai-deploy
+    ports:
+      - "8001:8000"  # FastAPI deployment server
+    volumes:
+      - ./output/student_model/final_model:/app/model
+      - ./config.yaml:/app/config.yaml
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - PYTHONPATH=/app
+    command: python deploy.py --model_path /app/model --tokenizer_path /app/model --server_type fastapi --port 8000
+    depends_on:
+      - steveai
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  # Training monitoring service
+  steveai-monitor:
+    build: .
+    container_name: steveai-monitor
+    ports:
+      - "8002:8000"  # Monitoring dashboard
+    volumes:
+      - ./logs:/app/logs
+      - ./output:/app/output
+    environment:
+      - PYTHONPATH=/app
+    command: python monitor_training.py --log_dir /app/logs
+    depends_on:
+      - steveai
+    restart: unless-stopped
+
+  # Jupyter notebook service for development
+  steveai-jupyter:
+    build: .
+    container_name: steveai-jupyter
+    ports:
+      - "8888:8888"
+    volumes:
+      - .:/app
+      - ./notebooks:/app/notebooks
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - PYTHONPATH=/app
+    command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=''
+    restart: unless-stopped
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: steveai-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  # PostgreSQL for metadata storage (optional)
+  postgres:
+    image: postgres:15-alpine
+    container_name: steveai-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=steveai
+      - POSTGRES_USER=steveai
+      - POSTGRES_PASSWORD=steveai_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # Nginx reverse proxy (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: steveai-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - steveai
+      - steveai-deploy
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  postgres_data:
+
+networks:
+  default:
+    name: steveai-network

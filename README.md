@@ -45,14 +45,14 @@ The goal is to make model distillation feasible even with limited computational 
     ```
     *(Alternatively, you can paste the content of `teacher_inference_gpu.py` directly into a notebook cell and run it.)*
 
-5.  **Configuration:** You can modify the parameters at the top of `teacher_inference_gpu.py` before running:
-    *   `teacher_model_id`: The Hugging Face ID of the teacher model.
-    *   `tokenizer_path`: Path/ID for the tokenizer (usually same as teacher).
-    *   `dataset_id`: Hugging Face dataset ID (e.g., `yahma/alpaca-cleaned`).
-    *   `dataset_subset_size`: Number of samples to process (e.g., `500`). Set to `None` for the full dataset (be mindful of time limits).
-    *   `max_seq_length`: Max token sequence length (e.g., `256`). Higher values need more VRAM.
-    *   `teacher_inference_batch_size`: Number of samples per batch (e.g., `4`). Adjust based on GPU VRAM (T4 might need 2 or 4, V100+ could handle 8+).
-    *   `output_base_dir`: Where to save the output within the Kaggle environment (`/kaggle/working/...`).
+5.  **Configuration:** You can modify the parameters in the `Config` class at the top of `teacher_inference_gpu.py` or use the `config.yaml` file:
+    *   `TEACHER_MODEL_ID`: The Hugging Face ID of the teacher model.
+    *   `TOKENIZER_PATH`: Path/ID for the tokenizer (usually same as teacher).
+    *   `DATASET_ID`: Hugging Face dataset ID (e.g., `yahma/alpaca-cleaned`).
+    *   `DATASET_SUBSET_SIZE`: Number of samples to process (e.g., `500`). Set to `None` for the full dataset (be mindful of time limits).
+    *   `MAX_SEQ_LENGTH`: Max token sequence length (e.g., `256`). Higher values need more VRAM.
+    *   `TEACHER_INFERENCE_BATCH_SIZE`: Number of samples per batch (e.g., `4`). Adjust based on GPU VRAM (T4 might need 2 or 4, V100+ could handle 8+).
+    *   Output directory is automatically detected based on environment (Kaggle vs local).
 
 6.  **Output:** The script will generate and save teacher logits as `.pt` files in the specified output directory (e.g., `/kaggle/working/Kaggle_Distillation_GPU_Teacher_Inference/teacher_logits_float16/`). Progress and memory usage will be logged.
 

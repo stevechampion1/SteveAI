@@ -1,0 +1,50 @@
+# SteveAI Teacher Inference Configuration
+
+# Model Configuration
+model:
+  teacher_model_id: "deepseek-ai/deepseek-coder-6.7b-instruct"
+  tokenizer_path: "deepseek-ai/deepseek-coder-6.7b-instruct"  # Usually same as teacher
+  student_model_id: "deepseek-ai/deepseek-coder-1.3b-instruct"  # For future use
+
+# Dataset Configuration
+dataset:
+  dataset_id: "yahma/alpaca-cleaned"
+  dataset_subset_size: 500  # Set to null for full dataset
+  max_seq_length: 256
+  train_split: "train"
+
+# Training Configuration
+training:
+  learning_rate: 0.00005
+  num_epochs: 3
+  batch_size: 8
+  gradient_accumulation_steps: 4
+  max_grad_norm: 1.0
+  warmup_steps: 100
+  temperature: 4.0
+  alpha: 0.7
+  beta: 0.3
+
+# Training/Inference Configuration
+inference:
+  batch_size: 4  # Adjust based on GPU VRAM: T4/P100: 2-4, V100/A100: 8+
+  num_workers: 2  # Number of CPU cores for data loading
+  dtype: "float16"  # Use float16 for less VRAM usage
+
+# Output Configuration
+output:
+  base_dir: "./output/SteveAI_Teacher_Inference"  # Auto-detects Kaggle vs local
+  logits_dir: "teacher_logits_float16"
+  save_frequency: 20  # Save checkpoint every N batches
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(levelname)s - %(message)s"
+  log_memory_every: 20  # Log memory usage every N batches
+
+# Environment Detection
+environment:
+  auto_detect: true
+  kaggle_path: "/kaggle/working/SteveAI_Teacher_Inference"
+  local_path: "./output/SteveAI_Teacher_Inference"

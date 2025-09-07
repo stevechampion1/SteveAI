@@ -1,10 +1,12 @@
-torch
-transformers
-datasets
-pandas
-pyarrow
-psutil
-tqdm
-accelerate
-# Consider adding specific versions if you encounter compatibility issues later
-# Example: transformers==4.38.0
+torch>=2.0.0
+transformers>=4.30.0
+datasets>=2.12.0
+pandas>=1.5.0
+pyarrow>=10.0.0
+psutil>=5.9.0
+tqdm>=4.65.0
+accelerate>=0.20.0
+# Specific versions for better reproducibility
+# torch==2.0.1
+# transformers==4.38.0
+# datasets==2.14.0
