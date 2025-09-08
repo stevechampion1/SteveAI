@@ -76,7 +76,7 @@ class ModelOptimizer:
 
     def _dynamic_quantization(self) -> nn.Module:
         """Apply dynamic quantization."""
-        quantized_model = torch.quantization.quantize_dynamic(
+        quantized_model = quantization.quantize_dynamic(
             self.model, {nn.Linear, nn.LSTM, nn.GRU}, dtype=torch.qint8
         )
 
@@ -91,11 +91,11 @@ class ModelOptimizer:
             raise ValueError("Calibration data required for static quantization")
 
         # Set quantization config
-        quantization_config = torch.quantization.get_default_qconfig("fbgemm")
+        quantization_config = quantization.get_default_qconfig("fbgemm")
         self.model.qconfig = quantization_config
 
         # Prepare model for quantization
-        prepared_model = torch.quantization.prepare(self.model)
+        prepared_model = quantization.prepare(self.model)
 
         # Calibrate with data
         prepared_model.eval()
@@ -107,7 +107,7 @@ class ModelOptimizer:
                     prepared_model(data)
 
         # Convert to quantized model
-        quantized_model = torch.quantization.convert(prepared_model)
+        quantized_model = quantization.convert(prepared_model)
 
         logger.info("Static quantization applied")
         return quantized_model
@@ -115,11 +115,11 @@ class ModelOptimizer:
     def _qat_quantization(self) -> nn.Module:
         """Apply quantization-aware training."""
         # Set quantization config
-        quantization_config = torch.quantization.get_default_qat_qconfig("fbgemm")
+        quantization_config = quantization.get_default_qat_qconfig("fbgemm")
         self.model.qconfig = quantization_config
 
         # Prepare for QAT
-        prepared_model = torch.quantization.prepare_qat(self.model)
+        prepared_model = quantization.prepare_qat(self.model)
 
         logger.info("Model prepared for quantization-aware training")
         return prepared_model

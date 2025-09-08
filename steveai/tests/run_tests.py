@@ -15,7 +15,7 @@ from steveai.tests.test_integration import run_integration_tests
 from steveai.tests.test_performance import run_performance_tests
 
 # Import test modules
-from steveai.tests.test_steveai import run_tests as run_unit_tests
+from steveai.tests.test_steveai import run_tests
 
 
 def run_all_tests():
@@ -28,7 +28,7 @@ def run_all_tests():
     # Run unit tests
     print("\n📋 Running Unit Tests...")
     print("-" * 30)
-    unit_success = run_unit_tests()
+    unit_success = run_tests()
 
     # Run integration tests
     print("\n🔗 Running Integration Tests...")
@@ -123,7 +123,7 @@ def run_ci_tests():
 
     # Run unit and integration tests (skip performance tests for CI)
     print("\n📋 Running Unit Tests...")
-    unit_success = run_unit_tests()
+    unit_success = run_tests()
 
     print("\n🔗 Running Integration Tests...")
     integration_success = run_integration_tests()
